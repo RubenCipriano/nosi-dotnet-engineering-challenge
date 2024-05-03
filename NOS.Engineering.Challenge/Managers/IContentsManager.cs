@@ -9,4 +9,6 @@ public interface IContentsManager
     Task<Content?> GetContent(Guid id);
     Task<Content?> UpdateContent(Guid id, ContentDto content);
     Task<Guid> DeleteContent(Guid id);
+    Task<Content?> AddGenreAsync(Guid id, IEnumerable<string> genres);
+    Task<Content?> RemoveGenreAsync(Guid id, IEnumerable<string> genres);
 }

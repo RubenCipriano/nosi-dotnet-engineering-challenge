@@ -10,14 +10,18 @@ namespace NOS.Engineering.Challenge.API.Controllers;
 public class ContentController : Controller
 {
     private readonly IContentsManager _manager;
-    public ContentController(IContentsManager manager)
+    private readonly ILogger<ContentController> _logger;
+    public ContentController(IContentsManager manager, ILogger<ContentController> logger)
     {
         _manager = manager;
+        _logger = logger;
     }
     
     [HttpGet]
     public async Task<IActionResult> GetManyContents()
     {
+        _logger.LogInformation("[GET] api/v1/Content");
+
         var contents = await _manager.GetManyContents().ConfigureAwait(false);
 
         if (!contents.Any())
@@ -29,6 +33,8 @@ public class ContentController : Controller
     [HttpGet("{id}")]
     public async Task<IActionResult> GetContent(Guid id)
     {
+        _logger.LogInformation($"[GET] api/v1/Content/{id}");
+
         var content = await _manager.GetContent(id).ConfigureAwait(false);
 
         if (content == null)
@@ -42,6 +48,8 @@ public class ContentController : Controller
         [FromBody] ContentInput content
         )
     {
+        _logger.LogInformation($"[POST] api/v1/Content");
+
         var createdContent = await _manager.CreateContent(content.ToDto()).ConfigureAwait(false);
 
         return createdContent == null ? Problem() : Ok(createdContent);
@@ -53,6 +61,8 @@ public class ContentController : Controller
         [FromBody] ContentInput content
         )
     {
+        _logger.LogInformation($"[PATCH] api/v1/Content/{id}");
+
         var updatedContent = await _manager.UpdateContent(id, content.ToDto()).ConfigureAwait(false);
 
         return updatedContent == null ? NotFound() : Ok(updatedContent);
@@ -63,25 +73,31 @@ public class ContentController : Controller
         Guid id
     )
     {
+        _logger.LogInformation($"[DELETE] api/v1/Content/{id}");
+
         var deletedId = await _manager.DeleteContent(id).ConfigureAwait(false);
         return Ok(deletedId);
     }
     
     [HttpPost("{id}/genre")]
-    public Task<IActionResult> AddGenres(
+    public async Task<IActionResult> AddGenres(
         Guid id,
-        [FromBody] IEnumerable<string> genre
+        [FromBody] IEnumerable<string> genres
     )
     {
-        return Task.FromResult<IActionResult>(StatusCode((int)HttpStatusCode.NotImplemented));
+        _logger.LogInformation($"[POST] api/v1/Content/{id}/genre");
+
+        return Ok(_manager.AddGenreAsync(id, genres).ConfigureAwait(false));
     }
     
     [HttpDelete("{id}/genre")]
-    public Task<IActionResult> RemoveGenres(
+    public async Task<IActionResult> RemoveGenres(
         Guid id,
-        [FromBody] IEnumerable<string> genre
+        [FromBody] IEnumerable<string> genres
     )
     {
-        return Task.FromResult<IActionResult>(StatusCode((int)HttpStatusCode.NotImplemented));
+        _logger.LogInformation($"[DELETE] api/v1/Content/{id}/genre");
+
+        return Ok(_manager.RemoveGenreAsync(id, genres).ConfigureAwait(false));
     }
 }

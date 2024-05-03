@@ -25,4 +25,9 @@ public class Content
         EndTime = endTime;
         GenreList = genreList;
     }
+
+    public ContentDto ToDto()
+    {
+        return new ContentDto(Title, SubTitle, Description, ImageUrl, Duration, StartTime, EndTime, GenreList);
+    }
 }
