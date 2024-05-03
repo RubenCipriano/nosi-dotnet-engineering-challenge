@@ -1,9 +1,13 @@
+using System;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using NOS.Engineering.Challenge.ApplicationDBContext;
 using NOS.Engineering.Challenge.Database;
 using NOS.Engineering.Challenge.Managers;
 using NOS.Engineering.Challenge.Models;
+using NOS.Engineering.Challenge.Services;
 
 namespace NOS.Engineering.Challenge.API.Extensions;
 
@@ -18,6 +22,12 @@ public static class WebApplicationBuilderExtensions
             options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             options.SerializerOptions.PropertyNamingPolicy = null;
         });
+
+        var connectionString = webApplicationBuilder.Configuration.GetConnectionString("DefaultConnection");
+
+        webApplicationBuilder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString, 
+            b => b.MigrationsAssembly("NOS.Engineering.Challenge.API")));
+
         serviceCollection.AddControllers();
         serviceCollection
             .AddEndpointsApiExplorer();
@@ -35,9 +45,12 @@ public static class WebApplicationBuilderExtensions
 
     private static IServiceCollection RegisterSlowDatabase(this IServiceCollection services)
     {
-        services.AddSingleton<IDatabase<Content, ContentDto>,SlowDatabase<Content, ContentDto>>();
+        services.AddMemoryCache();
+        services.AddSingleton<ICacheService<Content>, CacheService<Content>>();
+        services.AddSingleton<IDatabase<Content, ContentDto>, SlowDatabase<Content, ContentDto>>();
         services.AddSingleton<IMapper<Content, ContentDto>, ContentMapper>();
         services.AddSingleton<IMockData<Content>, MockData>();
+        services.AddDbContext<ApplicationDbContext>();
 
         return services;
     }
