@@ -11,4 +11,6 @@ public interface IContentsManager
     Task<Guid> DeleteContent(Guid id);
     Task<Content?> AddGenreAsync(Guid id, IEnumerable<string> genres);
     Task<Content?> RemoveGenreAsync(Guid id, IEnumerable<string> genres);
+
+    Task<IEnumerable<Content?>> GetFilteredContents(string? title, string? genre);
 }
